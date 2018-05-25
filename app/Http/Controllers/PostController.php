@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Post;
+use Session;
 
 class PostController extends Controller
 {
@@ -46,9 +47,9 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-          'title' => 'required',
-          'content' => 'required'
+        $request->validate ([
+            'title' => 'required',
+            'content' => 'required'
         ]);
 
         $post = new Post();
@@ -58,9 +59,9 @@ class PostController extends Controller
         $post->author = $request->user()->name;
         $post->save();
 
-        if ($post->save()) {
-          // code...
-          return redirect()->route('posts.index');
+        if($post->save()){
+            Session::flash('success','Post berhasil di buat');
+            return redirect()->route('posts.index');
         }
     }
 
@@ -72,8 +73,8 @@ class PostController extends Controller
      */
     public function show($id)
     {
-          $post = Post::find($id);
-          return view('posts.show', compact('post'));
+        $post = Post::find($id);
+        return view('posts.show',compact('post'));
     }
 
     /**
@@ -84,7 +85,8 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        return view('posts.edit');
+        $post = Post::find($id);
+        return view('posts.edit',compact('post'));
     }
 
     /**
@@ -96,7 +98,20 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate ([
+            'title' => 'required|max:255',
+            'content' => 'required'
+        ]);
+
+        $post = new Post();
+        $post->title = $request->title;
+        $post->content = $request->content;
+        $post->image = 'Image';
+        $post->author = 'test';
+        $post->save();
+
+        return redirect()->route('posts.index');
+
     }
 
     /**
@@ -108,5 +123,9 @@ class PostController extends Controller
     public function destroy($id)
     {
         //
+        $post = Post::find($id);
+        $post -> delete();
+
+        return redirect()->route('posts.index');
     }
 }
